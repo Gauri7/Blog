@@ -3,6 +3,7 @@ package com.login;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.jdo.PersistenceManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,36 +18,72 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 public class Login extends HttpServlet {
-	public void doPost(HttpServletRequest req, HttpServletResponse resp)
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 		 resp.setContentType("text/html");  
 		PrintWriter out=resp.getWriter();
 		DatastoreService lds=DatastoreServiceFactory.getDatastoreService();
-		String name=req.getParameter("name");
+		String username=req.getParameter("username");
 		String password=req.getParameter("password");
-		Key key=KeyFactory.createKey("UserDetails", name);
-		try {
-			 com.google.appengine.api.datastore.Entity ent=lds.get(key);
-				if (ent.getProperty("password").equals(password)){
-					out.print("your login is successfull");
-				       HttpSession session=req.getSession(true); 
-				       session.setAttribute("userName",name); 
-				       out.print("Welcome :)"+name);
-				        req.getRequestDispatcher("Logout.html").forward(req, resp);
+		if(Validation.nullCheckLogin(username, password)){
+		Key key=KeyFactory.createKey("UserDetail", username);
+		
+		
+//			 com.google.appengine.api.datastore.Entity ent=lds.get(key);
+			PersistenceManager pm = PMF.get().getPersistenceManager();
+			userDetail userDetails = pm.getObjectById(userDetail.class,username);
+	//		userDetails.getPassword().equals(password)
+
+				if (userDetails.getPassword().equals(password)){
+					
+//				
+					
+					HttpSession session = req.getSession();
+					session.setAttribute("uname", username);
+					
+					System.out.print(session.getAttribute("uname"));
+					
+				   	String text = "Loggedin";
+
+				    resp.setContentType("text/plain"); 
+				    resp.setCharacterEncoding("UTF-8");
+				    resp.getWriter().write(text); 
 				       
+				   // resp.sendRedirect("welcome.jsp");
+				    
 				}
 				else{
-					out.print("please enter valid details");
-					 req.getRequestDispatcher("Login.html").forward(req, resp);
+					
+					//out.print("please enter valid details");
+					
+					String text = "invalid";
+
+				    resp.setContentType("text/plain"); 
+				    resp.setCharacterEncoding("UTF-8");
+			        resp.getWriter().write(text); 
+					 //req.getRequestDispatcher("Login.html").forward(req, resp);
 				}
 				//System.out.print(employee.toString());
-			} catch (EntityNotFoundException e) {
-				// TODO Auto-generated catch block
-				out.println("please signup first");
-				 req.getRequestDispatcher("Signup.html").include(req, resp);  
+			 
 				
-				//System.out.println("Not found");
 			}
+		
+		else {
+			//out.print("Please fill fields");
+			
+			String text = "fill";
+
+		    resp.setContentType("text/plain"); 
+		    resp.setCharacterEncoding("UTF-8");
+		    resp.getWriter().write(text); 
+			//req.getRequestDispatcher("Login.html").forward(req, resp);
+			
+		}
 		
 	}
 }

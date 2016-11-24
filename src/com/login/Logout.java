@@ -16,21 +16,26 @@ public class Logout extends HttpServlet {
 		resp.setContentType("text/html");
 		
 		PrintWriter out = resp.getWriter();
-
+		
+System.out.println("LOGOUT");
 		HttpSession session = req.getSession(false);
-		if (session != null) {
-			String name = (String) session.getAttribute("name");
+		//if (session != null) {
+			//String name = (String) session.getAttribute("name");
 
 			
 			// HttpSession session=req.getSession();
+			session.removeAttribute("name");
 			session.invalidate();
+			//session.setAttribute("uname", "");
+			String text = "Loggedout";
 
-			out.print("You are successfully logged out!");
-			req.getRequestDispatcher("login.html").forward(req, resp);
-		} else {
-			out.print("Please login first");
-			req.getRequestDispatcher("login.html").forward(req, resp);
-		}
+		    resp.setContentType("text/plain"); 
+		    resp.setCharacterEncoding("UTF-8");
+		    resp.getWriter().write(text); 
+			
+		  //  out.append("You are successfully logged out!");
+			//req.getRequestDispatcher("login.html").forward(req, resp);
+		
 		out.close();
 	}
 }
